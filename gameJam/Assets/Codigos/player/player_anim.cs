@@ -14,28 +14,41 @@ public class player_anim : MonoBehaviour
 
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        moveAnim();
+   
 
-
-    }
-    void moveAnim()
+    public void UpdateStates(bool isAccelerating, bool isAttacking)
     {
-        if (PL.Movex > 0 || PL.Movex < 0 )
+        float speed = PL.GetComponent<Rigidbody2D>().velocity.x;
+
+        // Ataque tem prioridade
+        if (isAttacking)
         {
-            animPlayer.SetInteger("transition", 1); //animaçao de andar
+            atk();
+            return;
         }
 
+        // Correndo rápido
+        if (isAccelerating && speed > PL.speed + 0.1f)
+        {
+            animPlayer.SetInteger("transition", 2);
+        }
+        // Andando
+        else if (speed > 0.1f)
+        {
+            animPlayer.SetInteger("transition", 1);
+        }
+        // Parado
         else
         {
             animPlayer.SetInteger("transition", 0);
         }
-
     }
+   
     public void atk()
     {
         animPlayer.SetTrigger("atk");
     }
+
+
+
 }

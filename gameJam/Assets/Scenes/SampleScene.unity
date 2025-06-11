@@ -474,7 +474,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.4950883, y: -0.52357554, z: -10}
+  m_LocalPosition: {x: -22.6, y: -2.6, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -645,14 +645,14 @@ MonoBehaviour:
   m_LookaheadTime: 0
   m_LookaheadSmoothing: 0
   m_LookaheadIgnoreY: 0
-  m_XDamping: 1
+  m_XDamping: 0.1
   m_YDamping: 1
   m_ZDamping: 1
   m_TargetMovementOnly: 1
   m_ScreenX: 0.5
   m_ScreenY: 0.5
   m_CameraDistance: 10
-  m_DeadZoneWidth: 0.2
+  m_DeadZoneWidth: 0.08
   m_DeadZoneHeight: 0
   m_DeadZoneDepth: 0
   m_UnlimitedSoftZone: 0
@@ -749,7 +749,7 @@ Transform:
   m_GameObject: {fileID: 1553278119}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.4950883, y: -0.52357554, z: -10}
+  m_LocalPosition: {x: -22.6, y: -2.6, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -771,7 +771,6 @@ GameObject:
   - component: {fileID: 1637816273}
   - component: {fileID: 1637816276}
   - component: {fileID: 1637816277}
-  - component: {fileID: 1637816278}
   m_Layer: 0
   m_Name: Elena
   m_TagString: Untagged
@@ -840,7 +839,7 @@ Transform:
   m_GameObject: {fileID: 1637816270}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.4950883, y: -2.0235755, z: 0}
+  m_LocalPosition: {x: -22.6, y: -4.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -953,9 +952,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
-  maxHealth: 7
-  vida: 0
+  boostSpeed: 15
   intangivel: 0
+  maxStamina: 100
+  currentStamina: 0
+  staminaCost: 25
+  staminaRegenRate: 10
+  regenDelay: 2
+  anim: {fileID: 1637816277}
 --- !u!114 &1637816277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -968,25 +972,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67428f984ddfa7f409c2d2300ea65582, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1637816278
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1637816270}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58038016c8abd274b991abe9c7ec03c0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animatk: {fileID: 1637816277}
-  damage: 10
-  maxStamina: 100
-  currentStamina: 0
-  staminaCost: 25
-  staminaRegenRate: 10
-  regenDelay: 2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

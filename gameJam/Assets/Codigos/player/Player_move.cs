@@ -7,60 +7,111 @@ public class Player_move : MonoBehaviour
 
     // Variáveis
     [Header("Variáveis para mover")]
-    private float movex; // Movimento horizontal do jogador
     private Rigidbody2D RB; // Referência ao Rigidbody2D para física
-    [SerializeField] private float speed; // Velocidade de movimento do jogador
-    bool isfacingRigth = true; // Indica se o jogador está virado para a direita
+    public float speed; // Velocidade de movimento do jogador
+  
 
+    [Header("Ação")]
+    [SerializeField] private float boostSpeed = 10f; // Velocidade ao acelerar
+    private bool isAccelerating = false;
+    private bool isAttacking = false;
 
-    [Header("respaw")]
-    private Vector2 Checkpoint;
 
     [Header("Vida")]
-    public int maxHealth = 7; // Vida máxima do jogador
-    public int vida; // Vida atual do jogador
     public bool intangivel; // Indica se o jogador é intangível
     private SpriteRenderer spriteRenderer;
     private bool Hit;
 
-    public float Movex { get => movex; set => movex = value; }
+    [Header("Stamina")]
+    public float maxStamina = 100f;
+    public float currentStamina;
+    public float staminaCost = 25f;
+
+
+    [Header("Regeneração")]
+    public float staminaRegenRate = 10f;      // quanto regenera por segundo
+    public float regenDelay = 2f;             // tempo de espera antes de começar a regenerar
+    private float timeSinceLastAttack = 0f;
+
+    public player_anim anim;
 
     void Start()
     {
-        vida = maxHealth; // Inicializa a vida com o valor máximo
         RB = GetComponent<Rigidbody2D>(); // Obtém o componente Rigidbody2D
         spriteRenderer = GetComponent<SpriteRenderer>(); // Obtém o SpriteRenderer
-        Checkpoint = transform.position;
+        currentStamina = maxStamina;
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        movex = Input.GetAxisRaw("Horizontal"); // Captura a entrada horizontal do jogador
 
-        if (movex<0f||movex>0f)
+
+        bool holdingShift = Input.GetKey(KeyCode.LeftShift);// Acelerando?
+        isAttacking = Input.GetKeyDown(KeyCode.Space); // Atacando?
+
+        // Gasta stamina se estiver acelerando
+        if (holdingShift && currentStamina >= staminaCost * Time.deltaTime)
         {
-            OnMove();
-            flip();
+            isAccelerating = true;
+            currentStamina -= staminaCost * Time.deltaTime;
+            timeSinceLastAttack = 0f; // zera o tempo de espera pra regenerar
         }
+        else
+        {
+            isAccelerating = false;
+            timeSinceLastAttack += Time.deltaTime;
+
+            // Regenera após um tempo parado
+            if (timeSinceLastAttack >= regenDelay)
+            {
+                RegenerateStamina();
+            }
+        }
+        // Avisar o script de animação
+        anim.UpdateStates(isAccelerating, isAttacking);
+
+        OnMove(); // Movimento real
+
+
     }
     void OnMove()
     {
+        float currentSpeed = isAccelerating ? boostSpeed : speed;
+        RB.velocity = new Vector2(currentSpeed, RB.velocity.y);
         // Atualiza a velocidade horizontal do jogador
-        RB.velocity = new Vector2(speed * movex, RB.velocity.y);
+       
     }
-    void flip()
+
+    void OnTriggerEnter2D(Collider2D other)
     {
-
-        if (isfacingRigth && movex < 0f || !isfacingRigth && movex > 0f)
+        if (other.CompareTag("Pequeno"))
         {
-            isfacingRigth = !isfacingRigth;
-            Vector3 localscale = transform.localScale;
-            localscale.x *= -1f;
-            transform.localScale = localscale;
+            if (isAccelerating)
+            {
+                Destroy(other.gameObject); // Destrói objeto pequeno ao acelerar
+            }
+            else
+            {
+                receberdano(); // Penalidade
+            }
         }
-
+        else if (other.CompareTag("Grande"))
+        {
+           /* Obstacle obstacle = other.GetComponent<Obstacle>();
+            if (isAttacking && obstacle != null)
+            {
+                obstacle.TakeDamage(); // Reduz vida do objeto grande
+            }
+            else
+            {
+                receberdano(); // Penalidade se não atacar
+            }*/
+        }
     }
+
+
     IEnumerator damageplayer()
     {
 
@@ -79,27 +130,19 @@ public class Player_move : MonoBehaviour
     {
 
         intangivel = true;
-        vida--; // Reduz a vida
+  
         StartCoroutine(damageplayer());
-        if (vida <= 0)
+   
+
+    }
+    void RegenerateStamina()
+    {
+        if (currentStamina < maxStamina)
         {
-            // Exibe a tela de Game Over
-            StartCoroutine(Respawn(0.5f));
-
+            currentStamina += staminaRegenRate * Time.deltaTime;
+            currentStamina = Mathf.Min(currentStamina, maxStamina);
         }
+    }
 
-    }
-    IEnumerator Respawn(float duration)
-    {
-        spriteRenderer.enabled = false;
-        yield return new WaitForSeconds(duration);
-        transform.position = Checkpoint;
-        spriteRenderer.enabled = true;
-        vida = 5;
-      
-    }
-    public void updateChekpoint(Vector2 pos)
-    {
-        Checkpoint = pos;
-    }
+
 }
