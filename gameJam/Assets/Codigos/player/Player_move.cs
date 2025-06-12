@@ -35,6 +35,12 @@ public class Player_move : MonoBehaviour
 
     public player_anim anim;
 
+    private bool podeEmpurrar = false;
+    private float tempoEmpurrao = 0.5f; // meio segundo de empurro
+    private float empurraoTimer = 0f;
+
+    public float forca = 50f;
+
     void Start()
     {
         RB = GetComponent<Rigidbody2D>(); // Obtém o componente Rigidbody2D
@@ -69,6 +75,18 @@ public class Player_move : MonoBehaviour
                 RegenerateStamina();
             }
         }
+        if (isAccelerating || Input.GetKeyDown(KeyCode.Space))
+        {
+            // Atacando enquanto acelera
+            podeEmpurrar = true;
+            empurraoTimer = tempoEmpurrao;
+        }
+        if (podeEmpurrar)
+        {
+            empurraoTimer -= Time.deltaTime;
+            if (empurraoTimer <= 0f)
+                podeEmpurrar = false;
+        }
         // Avisar o script de animação
         anim.UpdateStates(isAccelerating, isAttacking);
 
@@ -76,50 +94,7 @@ public class Player_move : MonoBehaviour
 
 
     }
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        GameObject obj = collision.gameObject;
-        Vector2 direction = (obj.transform.position - transform.position).normalized;
-
-        if (obj.CompareTag("Pequeno"))
-        {
-            if (isAccelerating || isAttacking)
-                StartCoroutine(HandleSmallObjectHit(obj, direction));
-            else
-                ApplyKnockback(direction);
-        }
-        else if (obj.CompareTag("Grande"))
-        {
-            if (isAccelerating || isAttacking)
-            {
-                var bigObj = obj.GetComponent<Obj_Grande>();
-                if (bigObj != null)
-                    bigObj.LevarHit(direction);
-            }
-            else
-                ApplyKnockback(direction);
-        }
-    }
-   public  IEnumerator HandleSmallObjectHit(GameObject obj, Vector2 direction)
-    {
-        var rb = obj.GetComponent<Rigidbody2D>();
-        if (rb != null)
-            rb.AddForce(direction * 800f);
-
-        var animObj = obj.GetComponent<Animator>();
-        if (animObj)
-            animObj.SetTrigger("Destruir");
-
-        yield return new WaitForSeconds(0.3f);
-        Destroy(obj);
-    }
-
-    void ApplyKnockback(Vector2 direction)
-    {
-        var rb = GetComponent<Rigidbody2D>();
-        if (rb != null)
-            rb.AddForce(-direction * 300f);
-    }
+   
     void OnMove()
     {
         float currentSpeed = isAccelerating ? boostSpeed : speed;
@@ -128,7 +103,31 @@ public class Player_move : MonoBehaviour
        
     }
 
-   
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (podeEmpurrar && other.gameObject.CompareTag("Obstacle"))
+        {
+            Rigidbody2D obstacleRb = other.GetComponent<Rigidbody2D>();
+            if (obstacleRb != null)
+            {
+                bool paraEsquerda = (other.transform.position.x < transform.position.x); // ex: se obstáculo tá à esquerda do player
+
+                Vector2 bias = paraEsquerda ? new Vector2(-0.5f, 1f) : new Vector2(0.5f, 1f);
+
+                Debug.Log("Empurrando: " + other.name);
+                Vector2 pushDirection = (other.transform.position - transform.position).normalized;
+                Vector2 finalDirection = (pushDirection + bias).normalized;
+
+                obstacleRb.AddForce(finalDirection * forca, ForceMode2D.Impulse);
+            }
+            else
+            {
+                Debug.LogWarning("Objeto colidido não tem Rigidbody2D: " + other.name);
+            }
+        }
+    }
+
+
 
 
     IEnumerator damageplayer()
@@ -162,10 +161,7 @@ public class Player_move : MonoBehaviour
             currentStamina = Mathf.Min(currentStamina, maxStamina);
         }
     }
-    public bool IsAttackingOrDashing()
-    {
-        return isAccelerating || isAttacking;
-    }
+   
 
 
 }

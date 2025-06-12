@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Pequeno
   - Grande
+  - Obstacle
   layers:
   - Default
   - TransparentFX
