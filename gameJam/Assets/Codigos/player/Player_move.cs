@@ -76,6 +76,50 @@ public class Player_move : MonoBehaviour
 
 
     }
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        GameObject obj = collision.gameObject;
+        Vector2 direction = (obj.transform.position - transform.position).normalized;
+
+        if (obj.CompareTag("Pequeno"))
+        {
+            if (isAccelerating || isAttacking)
+                StartCoroutine(HandleSmallObjectHit(obj, direction));
+            else
+                ApplyKnockback(direction);
+        }
+        else if (obj.CompareTag("Grande"))
+        {
+            if (isAccelerating || isAttacking)
+            {
+                var bigObj = obj.GetComponent<Obj_Grande>();
+                if (bigObj != null)
+                    bigObj.LevarHit(direction);
+            }
+            else
+                ApplyKnockback(direction);
+        }
+    }
+   public  IEnumerator HandleSmallObjectHit(GameObject obj, Vector2 direction)
+    {
+        var rb = obj.GetComponent<Rigidbody2D>();
+        if (rb != null)
+            rb.AddForce(direction * 800f);
+
+        var animObj = obj.GetComponent<Animator>();
+        if (animObj)
+            animObj.SetTrigger("Destruir");
+
+        yield return new WaitForSeconds(0.3f);
+        Destroy(obj);
+    }
+
+    void ApplyKnockback(Vector2 direction)
+    {
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+            rb.AddForce(-direction * 300f);
+    }
     void OnMove()
     {
         float currentSpeed = isAccelerating ? boostSpeed : speed;
@@ -84,32 +128,7 @@ public class Player_move : MonoBehaviour
        
     }
 
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Pequeno"))
-        {
-            if (isAccelerating)
-            {
-                Destroy(other.gameObject); // Destrói objeto pequeno ao acelerar
-            }
-            else
-            {
-                receberdano(); // Penalidade
-            }
-        }
-        else if (other.CompareTag("Grande"))
-        {
-           /* Obstacle obstacle = other.GetComponent<Obstacle>();
-            if (isAttacking && obstacle != null)
-            {
-                obstacle.TakeDamage(); // Reduz vida do objeto grande
-            }
-            else
-            {
-                receberdano(); // Penalidade se não atacar
-            }*/
-        }
-    }
+   
 
 
     IEnumerator damageplayer()
@@ -142,6 +161,10 @@ public class Player_move : MonoBehaviour
             currentStamina += staminaRegenRate * Time.deltaTime;
             currentStamina = Mathf.Min(currentStamina, maxStamina);
         }
+    }
+    public bool IsAttackingOrDashing()
+    {
+        return isAccelerating || isAttacking;
     }
 
 
