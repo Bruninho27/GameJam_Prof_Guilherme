@@ -16,16 +16,11 @@ public class player_anim : MonoBehaviour
 
    
 
-    public void UpdateStates(bool isAccelerating, bool isAttacking)
+    public void UpdateStates(bool isAccelerating)
     {
         float speed = PL.GetComponent<Rigidbody2D>().velocity.x;
 
-        // Ataque tem prioridade
-        if (isAttacking)
-        {
-            atk();
-            return;
-        }
+      
 
         // Correndo rápido
         if (isAccelerating && speed > PL.speed + 0.1f)

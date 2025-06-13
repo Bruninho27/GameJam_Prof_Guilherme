@@ -1,15 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player_move : MonoBehaviour
 {
 
     // Variáveis
-    [Header("Variáveis para mover")]
     private Rigidbody2D RB; // Referência ao Rigidbody2D para física
+
+    [Header("speed")]
+    private float originalSpeed;
+    public float tempoLento = 1.5f;
+    public float speedLento = 2f;
     public float speed; // Velocidade de movimento do jogador
-  
+
 
     [Header("Ação")]
     [SerializeField] private float boostSpeed = 10f; // Velocidade ao acelerar
@@ -21,6 +26,8 @@ public class Player_move : MonoBehaviour
     public bool intangivel; // Indica se o jogador é intangível
     private SpriteRenderer spriteRenderer;
     private bool Hit;
+    public GameObject perseguidor; // Referência ao perseguidor
+   [SerializeField] private int danoRecebido = 0;
 
     [Header("Stamina")]
     public float maxStamina = 100f;
@@ -40,12 +47,38 @@ public class Player_move : MonoBehaviour
     private float empurraoTimer = 0f;
 
     public float forca = 50f;
+    private perseguidorControler perseguidorscrpit;
+
+    public int pontos; // Para pontuação
+
+    private float attackDuration = 0.5f; // tempo que o ataque dura
+    private float attackTimer = 0f;
+
+
+    private void Awake()
+    {
+        if (perseguidor != null)
+        {
+            perseguidorscrpit = perseguidor.GetComponent<perseguidorControler>();
+
+            if (perseguidorscrpit == null)
+                Debug.LogError("Script perseguidorControler não encontrado no objeto perseguidor.");
+        }
+        else
+        {
+            Debug.LogError("Perseguidor não atribuído no Inspector.");
+        }
+
+    }
 
     void Start()
     {
         RB = GetComponent<Rigidbody2D>(); // Obtém o componente Rigidbody2D
         spriteRenderer = GetComponent<SpriteRenderer>(); // Obtém o SpriteRenderer
         currentStamina = maxStamina;
+        originalSpeed = speed;
+
+      
 
     }
 
@@ -55,7 +88,24 @@ public class Player_move : MonoBehaviour
 
 
         bool holdingShift = Input.GetKey(KeyCode.LeftShift);// Acelerando?
-        isAttacking = Input.GetKeyDown(KeyCode.Space); // Atacando?
+      
+        if (Input.GetKeyDown(KeyCode.Space) && !isAttacking)
+        {
+            isAttacking = true;
+            attackTimer = attackDuration;
+
+            // Chama animação de ataque
+            anim.atk();
+        }
+
+        if (isAttacking)
+        {
+            attackTimer -= Time.deltaTime;
+            if (attackTimer <= 0f)
+            {
+                isAttacking = false;
+            }
+        }
 
         // Gasta stamina se estiver acelerando
         if (holdingShift && currentStamina >= staminaCost * Time.deltaTime)
@@ -88,9 +138,11 @@ public class Player_move : MonoBehaviour
                 podeEmpurrar = false;
         }
         // Avisar o script de animação
-        anim.UpdateStates(isAccelerating, isAttacking);
+        anim.UpdateStates(isAccelerating);
 
         OnMove(); // Movimento real
+        UiManager.Instance.AtualizarStamina(currentStamina, maxStamina);
+     
 
 
     }
@@ -146,12 +198,52 @@ public class Player_move : MonoBehaviour
 
     public void receberdano()
     {
-
+        if (intangivel) return;
         intangivel = true;
   
         StartCoroutine(damageplayer());
-   
 
+        danoRecebido++;
+
+        if (danoRecebido == 1)
+        {
+            // 1º Hit: mensagem de alerta
+            UiManager.Instance.MostrarMensagem("Você sentiu algo estranho atrás de você...");
+            
+        }
+        else if (danoRecebido == 2)
+        {
+            // 2º Hit: ativar perseguidor
+            perseguidor.SetActive(true);
+            perseguidorscrpit.player = this.transform; // <- ESSENCIAL
+            perseguidorscrpit.Ativar();
+            UiManager.Instance.MostrarMensagem("Você sentiu algo");
+          
+        }
+        else if (danoRecebido > 2)
+        {
+            // Hits seguintes: perseguidor avança
+           perseguidorscrpit.Avancar();
+        }
+
+
+    }
+    public void ReceberColisaoComObstaculo()
+    {
+        if (!intangivel)
+        {
+            receberdano(); // usa seu método já existente
+            StartCoroutine(ReduzirVelocidadeTemporariamente());
+        }
+    }
+
+
+
+    IEnumerator ReduzirVelocidadeTemporariamente()
+    {
+        speed = speedLento;
+        yield return new WaitForSeconds(tempoLento);
+        speed = originalSpeed;
     }
     void RegenerateStamina()
     {
@@ -161,7 +253,17 @@ public class Player_move : MonoBehaviour
             currentStamina = Mathf.Min(currentStamina, maxStamina);
         }
     }
-   
 
+    public bool EstaAcelerandoOuAtacando()
+    {
+        return isAccelerating || isAttacking;
+    }
+
+    public void AdicionarPontos(int valor)
+    {
+        pontos += valor;
+        UiManager.Instance.AtualizarPontos(pontos);
+        Debug.Log("Pontos: " + pontos);
+    }
 
 }
