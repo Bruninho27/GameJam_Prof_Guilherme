@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 4b4ccbf6805badd4088d982bdf471e38
+guid: 1291b0bb48a2a404881c9759fd63e8e1
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -48,7 +48,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 32
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -97,22 +97,22 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: elena boss attk_0
+      name: pause_0
       rect:
         serializedVersion: 2
-        x: 3
+        x: 0
         y: 0
-        width: 58
-        height: 128
-      alignment: 9
-      pivot: {x: 0.505262, y: 0.2257988}
+        width: 1920
+        height: 1080
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e17054a9024fa46478ba620625c95943
-      internalID: -2099135993
+      spriteID: 0a19948e16ed8b34c960d99f1a85c38c
+      internalID: -992233924
       vertices: []
       indices: 
       edges: []
@@ -128,7 +128,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      elena boss attk_0: -2099135993
+      pause_0: -992233924
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

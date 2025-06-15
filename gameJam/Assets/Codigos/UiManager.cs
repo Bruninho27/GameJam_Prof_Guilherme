@@ -12,8 +12,11 @@ public class UiManager : MonoBehaviour
     public Text mensagemTexto;
     public float tempoMensagem = 2f;
 
-    [Header("Stamina")]
+    [Header("HUds")]
     public Image staminaImage;  // UI do tipo "Image" com Fill
+    public Image VidaPlayerImage;  // UI do tipo "Image" com Fill
+    public Image VidaBossImage;  // UI do tipo "Image" com Fill
+
 
     [Header("Pontuação")]
     public TextMeshProUGUI pontosText; // UI para mostrar pontuação
@@ -42,6 +45,17 @@ public class UiManager : MonoBehaviour
     {
         if (staminaImage != null)
             staminaImage.fillAmount = atual / max;
+    }
+
+    public void AtualizavidaBoss(float atual, float max)
+    {
+        if(VidaBossImage!=null)
+            VidaBossImage.fillAmount = atual / max;
+    }
+    public void AtualizavidaPalyer(float atual , float max)
+    {
+        if(VidaPlayerImage!=null)
+            VidaPlayerImage.fillAmount = atual / max;
     }
 
     public void AtualizarPontos(int pontos)
